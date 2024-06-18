@@ -1,3 +1,2 @@
 yt-dlp
-ffmpeg-python
-ffprobe-python
+ffmpeg
