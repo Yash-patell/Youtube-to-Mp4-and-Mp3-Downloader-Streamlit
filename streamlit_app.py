@@ -2,8 +2,7 @@ import streamlit as st
 import yt_dlp
 import os
 import subprocess
-
-os.makedirs('downloads', exist_ok = True)
+import tempfile
 
 # Function to get available formats
 def get_formats(url):
@@ -18,27 +17,29 @@ def get_formats(url):
         return video_formats, audio_formats
     
 def download_selected_format(url, format_id, download_type):
-    os.makedirs('downloads', exist_ok=True)
     if download_type == 'Audio':
         # For audio, convert to MP3 with bitrate 320k
-        ydl_opts = {
-            'format': format_id,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
-            }],
-            'outtmpl': 'downloads/%(title)s.%(ext)s',
-        }
-    elif download_type =='Video' :
-        ydl_opts = {
-            'format': format_id,
-            'outtmpl': 'downloads/%(title)s.%(ext)s',
-        }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(url)
-        filename = ydl.prepare_filename(info_dict)
-        return filename
+        ydl_opts = {def download_selected_format(url, format_id, download_type):
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        if download_type == 'Audio':
+            ydl_opts = {
+                'format': format_id,
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '320',
+                }],
+                'outtmpl': os.path.join(tmpdirname, '%(title)s.%(ext)s'),
+            }
+        elif download_type == 'Video':
+            ydl_opts = {
+                'format': format_id,
+                'outtmpl': os.path.join(tmpdirname, '%(title)s.%(ext)s'),
+            }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url)
+            filename = ydl.prepare_filename(info_dict)
+            return filename
     
 # Function to merge video and audio with audio conversion to AAC at 256 kbps
 def merge_video_and_audio(video_filepath, audio_filepath):
@@ -95,11 +96,9 @@ if st.button('Download'):
             if selected_audio_format_id:
                 audio_filepath = download_selected_format(url, selected_audio_format_id, 'Video')
                 merged_filepath = merge_video_and_audio(video_filepath, audio_filepath)
-              
-                st.write(f'Merged file path: {merged_filepath}')
                 st.success('Video Downloaded Sucessfully!')
+                st.write(f'Merged file path: {merged_filepath}')
                 delete_files(video_filepath, audio_filepath)
-                
             else:
                 st.error('No audio format available for this video.')
         except Exception as e:
@@ -111,12 +110,4 @@ if st.button('Download'):
 
         except Exception as e:
             st.error(f'Error: {str(e)}')
-
-
-
-
-
-
-
-
 
