@@ -3,6 +3,8 @@ import yt_dlp
 import os
 import subprocess
 
+os.makedirs('downloads', exist_ok = True)
+
 # Function to get available formats
 def get_formats(url):
     ydl_opts = {
@@ -92,17 +94,9 @@ if st.button('Download'):
             if selected_audio_format_id:
                 audio_filepath = download_selected_format(url, selected_audio_format_id, 'Video')
                 merged_filepath = merge_video_and_audio(video_filepath, audio_filepath)
-                st.success('Video Downloaded Successfully!')
-
-                # Allow user to download merged video
-                with open(merged_filepath, "rb") as file:
-                    st.download_button(
-                        label="Download Merged Video",
-                        data=file,
-                        file_name=os.path.basename(merged_filepath),
-                        mime="video/mp4"
-                    )
-                delete_files(video_filepath, audio_filepath, merged_filepath)
+                st.success('Video Downloaded Sucessfully!')
+                st.write(f'Merged file path: {merged_filepath}')
+                delete_files(video_filepath, audio_filepath)
             else:
                 st.error('No audio format available for this video.')
         except Exception as e:
@@ -112,14 +106,14 @@ if st.button('Download'):
             audio_filepath = download_selected_format(url, selected_audio_format_id, 'Audio')
             st.success('Audio downloaded successfully!')
 
-            # Allow user to download audio file
-            with open(audio_filepath, "rb") as file:
-                st.download_button(
-                    label="Download Audio",
-                    data=file,
-                    file_name=os.path.basename(audio_filepath),
-                    mime="audio/mpeg"
-                )
-            delete_files(audio_filepath)
         except Exception as e:
             st.error(f'Error: {str(e)}')
+
+
+
+
+
+
+
+
+
