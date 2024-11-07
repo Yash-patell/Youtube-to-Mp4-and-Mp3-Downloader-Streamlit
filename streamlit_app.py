@@ -17,9 +17,6 @@ def get_formats(url):
         return video_formats, audio_formats
     
 def download_selected_format(url, format_id, download_type):
-    if download_type == 'Audio':
-        # For audio, convert to MP3 with bitrate 320k
-        ydl_opts = {def download_selected_format(url, format_id, download_type):
     with tempfile.TemporaryDirectory() as tmpdirname:
         if download_type == 'Audio':
             ydl_opts = {
