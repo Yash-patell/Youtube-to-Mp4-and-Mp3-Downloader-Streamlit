@@ -2,6 +2,7 @@ import streamlit as st
 import yt_dlp
 import os
 import subprocess
+import tempfile
 
 # Function to get available formats
 def get_formats(url):
@@ -39,7 +40,9 @@ def download_selected_format(url, format_id, download_type):
     
 # Function to merge video and audio with audio conversion to AAC at 256 kbps
 def merge_video_and_audio(video_filepath, audio_filepath):
-    output_filename = os.path.splitext(video_filepath)[0] + "_merged.mp4"
+    # Use tempfile to save the merged file temporarily before download
+    temp_dir = tempfile.mkdtemp()
+    output_filename = os.path.join(temp_dir, os.path.splitext(os.path.basename(video_filepath))[0] + "_merged.mp4")
     command = [
         'ffmpeg', '-i', video_filepath, '-i', audio_filepath,
         '-c:v', 'copy', '-c:a', 'aac', '-b:a', '256k', output_filename
@@ -92,11 +95,9 @@ if st.button('Download'):
             if selected_audio_format_id:
                 audio_filepath = download_selected_format(url, selected_audio_format_id, 'Video')
                 merged_filepath = merge_video_and_audio(video_filepath, audio_filepath)
-                st.success('Video Downloaded Sucessfully!')
-                st.write(f'Merged file path: {merged_filepath}')
-                delete_files(video_filepath, audio_filepath)
+                st.success('Video Downloaded Successfully!')
                 
-                # Enable download of merged file
+                # Allow user to download the merged file
                 with open(merged_filepath, 'rb') as f:
                     st.download_button(
                         label="Download Merged Video",
@@ -104,6 +105,7 @@ if st.button('Download'):
                         file_name=os.path.basename(merged_filepath),
                         mime="video/mp4"
                     )
+                delete_files(video_filepath, audio_filepath, merged_filepath)
             else:
                 st.error('No audio format available for this video.')
         except Exception as e:
@@ -111,9 +113,8 @@ if st.button('Download'):
     elif download_type == 'Audio':
         try:
             audio_filepath = download_selected_format(url, selected_audio_format_id, 'Audio')
-            st.success('Audio downloaded successfully!')
             
-            # Enable download of audio file
+            # Allow user to download the audio file
             with open(audio_filepath, 'rb') as f:
                 st.download_button(
                     label="Download Audio",
@@ -121,6 +122,7 @@ if st.button('Download'):
                     file_name=os.path.basename(audio_filepath),
                     mime="audio/mpeg"
                 )
-
+            st.success('Audio downloaded successfully!')
+            delete_files(audio_filepath)
         except Exception as e:
             st.error(f'Error: {str(e)}')
