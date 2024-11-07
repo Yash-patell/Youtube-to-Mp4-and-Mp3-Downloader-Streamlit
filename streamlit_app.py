@@ -18,6 +18,7 @@ def get_formats(url):
         return video_formats, audio_formats
     
 def download_selected_format(url, format_id, download_type):
+    os.makedirs('downloads', exist_ok=True)
     if download_type == 'Audio':
         # For audio, convert to MP3 with bitrate 320k
         ydl_opts = {
@@ -94,9 +95,11 @@ if st.button('Download'):
             if selected_audio_format_id:
                 audio_filepath = download_selected_format(url, selected_audio_format_id, 'Video')
                 merged_filepath = merge_video_and_audio(video_filepath, audio_filepath)
-                st.success('Video Downloaded Sucessfully!')
+              
                 st.write(f'Merged file path: {merged_filepath}')
+                  st.success('Video Downloaded Sucessfully!')
                 delete_files(video_filepath, audio_filepath)
+                
             else:
                 st.error('No audio format available for this video.')
         except Exception as e:
