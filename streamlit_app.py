@@ -97,7 +97,7 @@ if st.button('Download'):
                 merged_filepath = merge_video_and_audio(video_filepath, audio_filepath)
               
                 st.write(f'Merged file path: {merged_filepath}')
-                  st.success('Video Downloaded Sucessfully!')
+                st.success('Video Downloaded Sucessfully!')
                 delete_files(video_filepath, audio_filepath)
                 
             else:
